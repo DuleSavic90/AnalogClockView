@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <declare-styleable name="AnalogClockView"></declare-styleable>
+    <declare-styleable name="AnalogClockView">
+
+        <attr name="hours" format="integer" />
+        <attr name="minutes" format="integer" />
+        <attr name="sec" format="integer" />
+
+
+    </declare-styleable>
 </resources>
