@@ -23,14 +23,18 @@ public class AnalogClockView extends View {
     private Paint paint;
     private int width=0;
     private int height=0;
-    private int padding = 0;
-    private int handTruncation, hourHandTruncation = 0;
-    private int radius = 0;
     private boolean isInit;
 
     public AnalogClockView(Context context) {
         super(context);
-    }
+        Calendar c = Calendar.getInstance();
+        float hour = c.get(Calendar.HOUR_OF_DAY);
+        hour = hour > 12 ? hour - 12 : hour;
+        this.hours = (int) hour;
+        this.minutes = c.get(Calendar.MINUTE);
+        this.seconds = c.get(Calendar.SECOND);
+  }
+
     public AnalogClockView(Context context,int hours,int minutes,int seconds) {
         super(context);
         this.hours = hours;
@@ -42,9 +46,12 @@ public class AnalogClockView extends View {
         if(attrs != null){
             TypedArray typedArray = context.
                     obtainStyledAttributes(attrs, R.styleable.AnalogClockView);
-            hours = typedArray.getInt(R.styleable.AnalogClockView_hours, 1);
-            minutes = typedArray.getInt(R.styleable.AnalogClockView_minutes,1);
-            seconds = typedArray.getInt(R.styleable.AnalogClockView_sec,1);
+            Calendar c = Calendar.getInstance();
+            float hour = c.get(Calendar.HOUR_OF_DAY);
+            hour = hour > 12 ? hour - 12 : hour;
+            hours = typedArray.getInt(R.styleable.AnalogClockView_hours, (int) hour);
+            minutes = typedArray.getInt(R.styleable.AnalogClockView_minutes,c.get(Calendar.MINUTE));
+            seconds = typedArray.getInt(R.styleable.AnalogClockView_sec,c.get(Calendar.SECOND));
 
 
             typedArray.recycle();
@@ -55,35 +62,13 @@ public class AnalogClockView extends View {
     private void initClockDrawValues(){
         height = getHeight();
         width =  getWidth();
-        padding = 0;
-        int min = Math.min(height, width);
-        radius = min / 2 - padding;
-        handTruncation = min / 20;
-        hourHandTruncation = min / 7;
         paint = new Paint();
-        isInit = true;
-    }
-    private void drawHand(Canvas canvas, double loc, boolean isHour) {
-        double angle = Math.PI * loc / 30 - Math.PI / 2;
-        int handRadius = isHour ? radius - handTruncation - hourHandTruncation : radius - handTruncation;
-        canvas.drawLine(width / 2, height / 2,
-                (float) (width / 2 + Math.cos(angle) * handRadius),
-                (float) (height / 2 + Math.sin(angle) * handRadius),
-                paint);
-    }
-    private void drawHands(Canvas canvas) {
-        drawHand(canvas, hours*5, true);
-        drawHand(canvas, minutes, false);
-        drawHand(canvas, seconds, false);
-    }
-    private void drawCircle(Canvas canvas) {
-        paint.reset();
         paint.setColor(getResources().getColor(android.R.color.white));
         paint.setStrokeWidth(5);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setAntiAlias(true);
-        canvas.drawCircle(width / 2, height / 2, radius + padding - 10, paint);
+        isInit = true;
     }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -151,8 +136,36 @@ public class AnalogClockView extends View {
         }
 
         canvas.drawColor(Color.BLACK);
-        drawCircle(canvas);
-        drawHands(canvas);
+
+        canvas.drawCircle(width / 2, height / 2, width / 2 - 10, paint);
+
+        canvas.save();
+
+        canvas.rotate(seconds * 6, width/2, height/2);
+
+        canvas.drawLine(width/2, height/2, width/2, height/2 - width/2 + 10, paint);
+
+        canvas.restore();
+
+        canvas.save();
+
+        canvas.rotate(minutes * 6 + seconds / 10, width/2, height/2);
+
+        canvas.drawLine(width/2, height/2, width/2 , height/2 - width/2 + width/8, paint);
+
+        canvas.restore();
+
+        canvas.save();
+
+        canvas.rotate(hours * 30  + minutes / 2, width/2, height/2);
+
+        canvas.drawLine(width/2, height/2, width/2 , height/2 - width/2 + width/4, paint);
+
+        canvas.restore();
+
+
+
+        //   drawHands(canvas);
 
         seconds++;
         if (seconds>59)
